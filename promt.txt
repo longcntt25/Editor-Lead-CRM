@@ -1,0 +1,737 @@
+Bạn là Senior Full-stack Software Architect + Developer. Hãy thiết kế và xây dựng một ứng dụng desktop có tên tạm thời **Editor Lead CRM**, dành cho một nhóm nhỏ video editor tìm kiếm và quản lý khách hàng tiềm năng trên Instagram.
+
+## 1. Mục tiêu sản phẩm
+
+Ứng dụng không phải là bot spam Instagram.
+
+Mục tiêu chính là:
+
+**Tìm khách tiềm năng → đánh giá → lưu lead → giao cho editor → liên hệ → follow-up → theo dõi phản hồi → chốt thành khách hàng.**
+
+Ban đầu có khoảng 2–10 editor sử dụng chung.
+
+Hệ thống phải được thiết kế theo dạng module để sau này dễ thêm:
+- TikTok
+- YouTube
+- LinkedIn
+- Email
+- AI
+- CRM khách hàng
+- quản lý job
+- analytics nâng cao
+
+Không xây microservices ở giai đoạn đầu.
+
+---
+
+## 2. Công nghệ bắt buộc
+
+### Desktop client
+- Tauri
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui
+- TanStack Query
+- Zustand
+
+### Backend
+- Cloudflare Workers
+- TypeScript
+- Hono
+
+### Database
+- Cloudflare D1
+
+### Background jobs
+- Cloudflare Queues
+
+### Có thể bổ sung sau
+- Cloudflare R2 cho file
+- Cloudflare Pages nếu xây web version
+- OpenAI API hoặc Workers AI
+
+---
+
+## 3. Kiến trúc tổng thể
+
+Ứng dụng phải chia logic giữa máy người dùng và Cloudflare.
+
+### Desktop xử lý:
+- giao diện
+- tìm kiếm/filter dữ liệu local
+- sort
+- cache
+- xử lý text nhẹ
+- validate form
+- một số tính toán không bí mật
+
+### Cloudflare Worker xử lý:
+- đăng nhập
+- session/token
+- license
+- quyền user
+- workspace/team
+- business logic quan trọng
+- lead scoring chính
+- discovery logic quan trọng
+- Instagram integrations
+- API keys
+- AI API
+- dữ liệu chung
+- giới hạn sử dụng
+
+Không lưu API key bí mật trong desktop client.
+
+Mọi quyền truy cập quan trọng phải được kiểm tra lại trên server.
+
+---
+
+## 4. Thiết kế module
+
+Backend phải theo modular architecture.
+
+Tạo các module độc lập:
+
+- auth
+- users
+- workspace
+- leads
+- discovery
+- outreach
+- follow-up
+- pipeline
+- templates
+- activities
+- analytics
+- notifications
+- integrations
+- instagram
+
+Không để business logic Instagram nằm trực tiếp trong Lead module.
+
+Thiết kế lớp integration để sau này có thể thêm:
+
+- InstagramProvider
+- TikTokProvider
+- YouTubeProvider
+
+---
+
+## 5. Workspace và Team
+
+Ứng dụng hỗ trợ nhiều editor trong cùng một workspace.
+
+Cấu trúc:
+
+User
+→ WorkspaceMember
+→ Workspace
+
+Một workspace có:
+- nhiều editor
+- nhiều lead
+- nhiều template
+- pipeline riêng
+- analytics riêng
+
+Role ban đầu:
+
+OWNER
+EDITOR
+
+OWNER:
+- quản lý member
+- xem toàn bộ leads
+- xem analytics
+- assign lead
+- thay đổi settings
+
+EDITOR:
+- xem lead được phép
+- contact lead
+- thêm note
+- cập nhật pipeline
+
+---
+
+## 6. Lead Management
+
+Lead là khách hàng tiềm năng, không phải user của hệ thống.
+
+Một lead cần có:
+
+- id
+- workspace_id
+- assigned_user_id
+- platform
+- platform_user_id
+- username
+- display_name
+- profile_url
+- avatar_url
+- bio
+- website
+- follower_count
+- following_count
+- category
+- language
+- score
+- status
+- source
+- created_at
+- updated_at
+
+Category có thể gồm:
+
+- CREATOR
+- BRAND
+- AGENCY
+- PODCAST
+- YOUTUBER
+- COACH
+- PERSONAL_BRAND
+- EDITOR
+- OTHER
+
+---
+
+## 7. Discover
+
+Trang Discover dùng để tìm khách hàng tiềm năng.
+
+Cho phép người dùng nhập:
+
+- keyword
+- category
+- follower range
+- language
+- seed accounts
+- nguồn lead
+
+Kết quả hiển thị:
+
+- avatar
+- username
+- display name
+- bio ngắn
+- follower count
+- category
+- lead quality
+
+Actions:
+
+- Add Lead
+- Skip
+- Open Instagram
+
+Không tự động gửi spam DM.
+
+Discovery phải được thiết kế thành job.
+
+Ví dụ:
+
+POST /api/v1/discovery/jobs
+
+Worker tạo job và gửi vào Cloudflare Queue.
+
+Ứng dụng có thể đóng nhưng background job vẫn tiếp tục.
+
+---
+
+## 8. Lead Scoring
+
+Tạo hệ thống chấm điểm khách hàng.
+
+Ban đầu dùng rule-based scoring.
+
+Ví dụ:
+
+- đúng category +20
+- follower range phù hợp +15
+- profile active +20
+- có website +10
+- đúng ngôn ngữ +10
+- content phù hợp +20
+
+Kết quả:
+
+HIGH
+MEDIUM
+LOW
+
+Không hardcode logic scoring trong UI.
+
+Scoring quan trọng phải chạy trên Worker.
+
+Thiết kế sao cho sau này có thể thay bằng AI scoring.
+
+---
+
+## 9. Lead Detail
+
+Khi mở một lead, hiển thị:
+
+- thông tin Instagram
+- category
+- score
+- assigned editor
+- status
+- notes
+- lịch sử hoạt động
+- last contacted
+- next follow-up
+
+Actions:
+
+- Open Instagram
+- Copy Message
+- Mark Contacted
+- Add Note
+- Assign Editor
+- Change Pipeline Stage
+- Schedule Follow-up
+
+---
+
+## 10. Outreach
+
+Cho phép tạo message template.
+
+Template có:
+
+- id
+- workspace_id
+- name
+- content
+- category
+
+Hỗ trợ biến:
+
+{{name}}
+{{username}}
+{{company}}
+
+Ví dụ workflow:
+
+Lead
+→ chọn template
+→ Copy Message
+→ Open Instagram
+→ người dùng gửi thủ công
+→ Mark Contacted
+
+Không tự động cold-DM nếu API Instagram không hỗ trợ.
+
+---
+
+## 11. Follow-up
+
+Một lead sau khi Contacted có thể có follow-up.
+
+Ví dụ:
+
+Initial contact
+→ 3 ngày
+→ Follow-up 1
+→ 5 ngày
+→ Follow-up 2
+
+Trang Follow-up hiển thị:
+
+- lead
+- editor phụ trách
+- ngày contact gần nhất
+- số ngày chưa reply
+- follow-up hiện tại
+
+Actions:
+
+- Open Instagram
+- Copy Follow-up
+- Mark Followed Up
+- Skip
+- Close Lead
+
+---
+
+## 12. Pipeline
+
+Pipeline phải tùy chỉnh được.
+
+Không hardcode stage trong source code.
+
+Database:
+
+pipelines
+
+pipeline_stages
+
+Ví dụ default pipeline:
+
+NEW
+QUALIFIED
+CONTACTED
+FOLLOW_UP
+REPLIED
+INTERESTED
+CLIENT
+LOST
+
+UI dạng Kanban.
+
+Cho phép kéo lead giữa các stage.
+
+---
+
+## 13. Lead Activities
+
+Mọi hành động quan trọng phải được lưu.
+
+Tạo bảng lead_activities.
+
+Activity type ví dụ:
+
+LEAD_CREATED
+ASSIGNED
+CONTACTED
+FOLLOW_UP
+REPLIED
+NOTE_ADDED
+STATUS_CHANGED
+CLIENT_WON
+CLIENT_LOST
+
+Lead Detail hiển thị timeline theo thời gian.
+
+---
+
+## 14. Dashboard
+
+Dashboard hiển thị:
+
+- Total Leads
+- Qualified Leads
+- Contacted
+- Replies
+- Interested
+- Clients
+- Follow-ups Today
+
+Hiển thị funnel:
+
+Leads
+→ Qualified
+→ Contacted
+→ Replied
+→ Interested
+→ Client
+
+Cho phép filter theo:
+
+- date
+- editor
+- category
+
+---
+
+## 15. Analytics
+
+Analytics V1 chỉ cần đơn giản.
+
+Theo dõi:
+
+- leads found
+- leads contacted
+- replies
+- positive replies
+- clients
+- conversion rate
+
+Theo editor:
+
+Editor A
+- leads contacted
+- replies
+- clients
+
+Theo category:
+
+Creator
+Agency
+Coach
+Brand
+
+Mục tiêu là biết loại lead nào hiệu quả nhất.
+
+---
+
+## 16. Instagram Integration
+
+Tạo integration module riêng.
+
+Không viết code Instagram trực tiếp trong LeadService.
+
+Thiết kế interface chung:
+
+SocialProfileProvider
+
+Các implementation có thể là:
+
+InstagramProvider
+
+Sau này:
+
+TikTokProvider
+YouTubeProvider
+
+Tuân thủ API chính thức của Meta.
+
+Không xây tính năng phụ thuộc vào scraping hoặc browser automation ngay trong MVP.
+
+---
+
+## 17. API
+
+Tất cả API version:
+
+/api/v1/
+
+Ví dụ:
+
+POST /api/v1/auth/login
+
+GET /api/v1/leads
+POST /api/v1/leads
+GET /api/v1/leads/:id
+PATCH /api/v1/leads/:id
+
+POST /api/v1/leads/:id/assign
+POST /api/v1/leads/:id/activities
+
+POST /api/v1/discovery/jobs
+GET /api/v1/discovery/jobs/:id
+
+GET /api/v1/templates
+POST /api/v1/templates
+
+GET /api/v1/follow-ups
+
+GET /api/v1/pipelines
+
+GET /api/v1/dashboard
+
+API phải validate input và kiểm tra workspace permission.
+
+---
+
+## 18. Database
+
+Thiết kế D1 schema tối thiểu gồm:
+
+users
+workspaces
+workspace_members
+
+leads
+lead_notes
+lead_activities
+
+pipelines
+pipeline_stages
+
+message_templates
+
+outreach_attempts
+follow_ups
+
+discovery_jobs
+
+integrations
+
+sessions
+
+Tất cả bảng business liên quan team phải chứa workspace_id khi phù hợp.
+
+Thêm index cho các field thường query như:
+
+workspace_id
+username
+status
+assigned_user_id
+created_at
+
+---
+
+## 19. Desktop UI
+
+Sidebar:
+
+Dashboard
+Discover
+Leads
+Follow-up
+Pipeline
+Templates
+Team
+Analytics
+Settings
+
+Phong cách:
+
+- clean
+- professional
+- dark/light mode
+- ít màu thừa
+- dashboard kiểu SaaS hiện đại
+- ưu tiên tốc độ thao tác
+
+Không tạo giao diện quá phức tạp.
+
+---
+
+## 20. Security
+
+Bắt buộc:
+
+- không để Cloudflare/API secret trong desktop
+- không tin dữ liệu từ client
+- server validate toàn bộ quyền
+- user chỉ truy cập workspace được phép
+- token có expiration
+- có cơ chế refresh/session
+- rate limiting cho endpoint nhạy cảm
+- log các hành động quan trọng
+
+Logic tạo giá trị chính phải nằm trên Cloudflare Worker để giảm khả năng bị copy toàn bộ ứng dụng.
+
+Client chỉ chứa những logic cần thiết để UI chạy nhanh.
+
+---
+
+## 21. Nguyên tắc code
+
+Ưu tiên:
+
+- đơn giản
+- dễ đọc
+- dễ mở rộng
+- type-safe
+- module độc lập
+- không over-engineering
+
+Không sử dụng microservices.
+
+Không tạo abstraction không cần thiết.
+
+Không xây tính năng chưa cần cho MVP.
+
+Mỗi module phải có trách nhiệm rõ ràng.
+
+Ưu tiên code thực tế có thể chạy hơn architecture quá lý thuyết.
+
+---
+
+## 22. Cấu trúc repository mong muốn
+
+Monorepo:
+
+apps/
+  desktop/
+  api/
+
+packages/
+  contracts/
+  shared/
+  config/
+
+Nếu cần worker consumer riêng:
+
+apps/
+  queue-worker/
+
+Sử dụng pnpm workspace.
+
+Có thể dùng Turborepo nếu thực sự hữu ích.
+
+---
+
+## 23. Thứ tự triển khai
+
+Không code toàn bộ một lúc.
+
+Thực hiện lần lượt.
+
+### Phase 1
+- project setup
+- monorepo
+- Tauri desktop
+- Worker API
+- D1
+- auth
+- workspace
+- team
+
+### Phase 2
+- Leads
+- Lead Detail
+- Notes
+- Activities
+- Assignment
+
+### Phase 3
+- Pipeline
+- Templates
+- Outreach
+- Follow-up
+
+### Phase 4
+- Dashboard
+- Analytics
+
+### Phase 5
+- Discovery architecture
+- Queue
+- Instagram integration
+
+### Phase 6
+- AI/scoring nâng cao
+
+Sau mỗi phase:
+1. kiểm tra code compile
+2. chạy test nếu có
+3. sửa lỗi
+4. đảm bảo phase hiện tại chạy ổn rồi mới sang phase tiếp theo
+
+---
+
+## 24. Yêu cầu khi làm việc với tôi
+
+Tôi không phải lập trình viên chuyên nghiệp.
+
+Khi giải thích:
+- dùng tiếng Việt
+- giải thích đơn giản
+- tránh thuật ngữ nếu không cần thiết
+- nếu dùng thuật ngữ kỹ thuật, giải thích một câu nó có nghĩa gì
+
+Không yêu cầu tôi tự viết những đoạn code phức tạp nếu bạn có thể thực hiện.
+
+Nếu có nhiều lựa chọn kỹ thuật, hãy chọn phương án phù hợp nhất với dự án thay vì bắt tôi quyết định từng chi tiết.
+
+---
+
+## 25. Việc đầu tiên cần làm
+
+Trước tiên:
+
+1. Phân tích yêu cầu ở trên.
+2. Đề xuất cấu trúc repository.
+3. Đề xuất database schema V1.
+4. Liệt kê các màn hình V1.
+5. Liệt kê API V1.
+6. Chỉ ra những phần nào chạy trên Desktop và phần nào chạy trên Cloudflare Worker.
+7. Sau đó mới bắt đầu tạo project.
+
+Không triển khai AI, Instagram automation hoặc tính năng phức tạp trước khi core Lead CRM hoạt động ổn định.

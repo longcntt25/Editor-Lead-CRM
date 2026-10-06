@@ -1,0 +1,9 @@
+name = "editor-lead-crm-api"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+
+# Cloudflare D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "editor_crm_d1"
+database_id = "local-editor-crm-d1-id"

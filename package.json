@@ -1,0 +1,16 @@
+{
+  "name": "editor-lead-crm-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:api": "pnpm --filter api dev",
+    "dev:desktop": "pnpm --filter desktop dev",
+    "build:shared": "pnpm --filter @editor-crm/shared build",
+    "build:api": "pnpm --filter api build",
+    "build:desktop": "pnpm --filter desktop build",
+    "typecheck": "pnpm -r exec tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
