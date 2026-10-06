@@ -48,6 +48,25 @@ app.onError((err, c) => {
   );
 });
 
+// Root info
+app.get('/', (c) => {
+  return c.json({
+    name: 'Editor Lead CRM API',
+    status: 'online',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      auth: '/api/v1/auth',
+      leads: '/api/v1/leads',
+      workspaces: '/api/v1/workspaces',
+      pipeline: '/api/v1/pipelines',
+      templates: '/api/v1/templates',
+      followUps: '/api/v1/follow-ups',
+      dashboard: '/api/v1/dashboard',
+    },
+  });
+});
+
 // Health check
 app.get('/health', (c) => {
   return c.json({
