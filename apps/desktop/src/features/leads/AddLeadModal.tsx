@@ -28,13 +28,24 @@ export const AddLeadModal: React.FC<AddLeadModalProps> = ({
 
   if (!isOpen) return null;
 
+  const parseInstagramUsername = (input: string): string => {
+    let clean = input.trim();
+    clean = clean.replace(/^(?:https?:\/\/)?(?:www\.)?instagram\.com\//i, '');
+    clean = clean.split(/[/?#]/)[0];
+    clean = clean.replace(/^@+/, '');
+    return clean.trim();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
     try {
-      const cleanUsername = username.replace(/^@/, '').trim();
+      const cleanUsername = parseInstagramUsername(username);
+      if (!cleanUsername) {
+        throw new Error('Vui lòng nhập Instagram username hoặc đường link profile hợp lệ');
+      }
       await api.post('/api/v1/leads', {
         username: cleanUsername,
         displayName: displayName || cleanUsername,

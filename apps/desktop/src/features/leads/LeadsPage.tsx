@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Filter, ExternalLink, ChevronRight, UserPlus, Eye, Instagram } from 'lucide-react';
+import { Search, Filter, ExternalLink, ChevronRight, UserPlus, Eye, Instagram, Download } from 'lucide-react';
 import { api } from '../../services/api';
 import { Lead, PipelineStage, LEAD_CATEGORIES, WorkspaceMember } from '@editor-crm/shared';
 
@@ -44,6 +44,47 @@ export const LeadsPage: React.FC<LeadsPageProps> = ({
   });
 
   const leads = data?.leads || [];
+
+  const handleExportCsv = () => {
+    if (leads.length === 0) return;
+    const headers = [
+      'Username',
+      'Tên hiển thị',
+      'Category',
+      'Followers',
+      'Đánh giá chất lượng',
+      'Điểm số',
+      'Pipeline Stage',
+      'Editor phụ trách',
+      'Profile Link',
+      'Website',
+      'Ngày liên hệ cuối',
+    ];
+
+    const rows = leads.map((l) => [
+      `"${l.username}"`,
+      `"${(l.displayName || l.username).replace(/"/g, '""')}"`,
+      `"${l.category}"`,
+      l.followerCount,
+      l.scoreTier,
+      l.scorePoints,
+      `"${l.stage?.name || ''}"`,
+      `"${l.assignedUser?.fullName || ''}"`,
+      `"${l.profileUrl || ''}"`,
+      `"${l.website || ''}"`,
+      l.lastContactedAt ? new Date(l.lastContactedAt * 1000).toLocaleDateString('vi-VN') : '',
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `leads-export-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const scoreBadgeColors = {
     HIGH: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
@@ -120,6 +161,16 @@ export const LeadsPage: React.FC<LeadsPageProps> = ({
             </option>
           ))}
         </select>
+
+        <button
+          onClick={handleExportCsv}
+          disabled={leads.length === 0}
+          title="Xuất danh sách lead ra file CSV (Excel)"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-300 hover:text-white text-xs font-medium border border-slate-700 transition-colors ml-auto"
+        >
+          <Download className="w-3.5 h-3.5 text-emerald-400" />
+          <span>Xuất CSV ({leads.length})</span>
+        </button>
       </div>
 
       {/* Table */}
