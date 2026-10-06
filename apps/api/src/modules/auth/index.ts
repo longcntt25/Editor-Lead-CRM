@@ -75,7 +75,7 @@ authApp.post('/register', zValidator('json', registerSchema), async (c) => {
   await c.env.DB.prepare(
     `INSERT INTO sessions (id, user_id, token, expires_at, created_at)
      VALUES (?, ?, ?, ?, ?)`
-  ).bind(generateId(), userId, sessionToken, expiresAt, now);
+  ).bind(generateId(), userId, sessionToken, expiresAt, now).run();
 
   return c.json({
     message: 'Đăng ký thành công',
@@ -117,7 +117,7 @@ authApp.post('/login', zValidator('json', loginSchema), async (c) => {
   await c.env.DB.prepare(
     `INSERT INTO sessions (id, user_id, token, expires_at, created_at)
      VALUES (?, ?, ?, ?, ?)`
-  ).bind(generateId(), userRecord.id, sessionToken, expiresAt, now);
+  ).bind(generateId(), userRecord.id, sessionToken, expiresAt, now).run();
 
   const user: User = {
     id: userRecord.id,

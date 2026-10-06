@@ -141,7 +141,7 @@ workspaceApp.post(
     await c.env.DB.prepare(
       `INSERT INTO workspace_members (id, workspace_id, user_id, role, joined_at)
        VALUES (?, ?, ?, ?, ?)`
-    ).bind(memberId, workspaceId, targetUser.id, role, now);
+    ).bind(memberId, workspaceId, targetUser.id, role, now).run();
 
     return c.json({
       message: 'Thêm thành viên thành công',
