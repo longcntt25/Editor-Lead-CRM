@@ -6,11 +6,13 @@ import { AuthPage } from './features/auth/AuthPage';
 import { Sidebar, NavTab } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { DashboardPage } from './features/dashboard/DashboardPage';
+import { DiscoverPage } from './features/discover/DiscoverPage';
 import { LeadsPage } from './features/leads/LeadsPage';
 import { PipelinePage } from './features/pipeline/PipelinePage';
 import { FollowupsPage } from './features/followups/FollowupsPage';
 import { TemplatesPage } from './features/templates/TemplatesPage';
 import { TeamPage } from './features/team/TeamPage';
+import { AnalyticsPage } from './features/analytics/AnalyticsPage';
 import { AddLeadModal } from './features/leads/AddLeadModal';
 import { LeadDetailDrawer } from './features/leads/LeadDetailDrawer';
 import { Pipeline, WorkspaceMember } from '@editor-crm/shared';
@@ -77,6 +79,13 @@ export const App: React.FC = () => {
             />
           )}
 
+          {currentTab === 'discover' && (
+            <DiscoverPage
+              stages={stages}
+              onOpenAddLead={() => setIsAddLeadOpen(true)}
+            />
+          )}
+
           {currentTab === 'leads' && (
             <LeadsPage
               stages={stages}
@@ -86,17 +95,19 @@ export const App: React.FC = () => {
             />
           )}
 
-          {currentTab === 'pipeline' && (
-            <PipelinePage stages={stages} onSelectLead={(id) => setSelectedLeadId(id)} />
-          )}
-
           {currentTab === 'followups' && (
             <FollowupsPage onSelectLead={(id) => setSelectedLeadId(id)} />
+          )}
+
+          {currentTab === 'pipeline' && (
+            <PipelinePage stages={stages} onSelectLead={(id) => setSelectedLeadId(id)} />
           )}
 
           {currentTab === 'templates' && <TemplatesPage />}
 
           {currentTab === 'team' && <TeamPage />}
+
+          {currentTab === 'analytics' && <AnalyticsPage />}
         </main>
       </div>
 

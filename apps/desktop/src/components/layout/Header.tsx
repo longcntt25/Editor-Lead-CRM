@@ -13,17 +13,21 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onOpenAddLead }) => 
       title: 'Dashboard Tổng Quan',
       subtitle: 'Chỉ số hiệu quả outreach và tiến độ chuyển đổi leads',
     },
+    discover: {
+      title: 'Khám Phá Khách Hàng Tiềm Năng (Discover)',
+      subtitle: 'Tìm kiếm, đánh giá độ chuẩn xác và lưu lead chỉ với 1 chạm',
+    },
     leads: {
       title: 'Quản Lý Khách Hàng Tiềm Năng (Leads)',
       subtitle: 'Tìm kiếm, đánh giá chất lượng và phân công editor phụ trách',
     },
-    pipeline: {
-      title: 'Pipeline Bán Hàng (Kanban)',
-      subtitle: 'Theo dõi tiến trình từ lúc tiếp cận đến khi chốt hợp đồng',
-    },
     followups: {
       title: 'Lịch Nhắc Follow-up',
       subtitle: 'Chăm sóc đúng hẹn để tăng 300% tỷ lệ phản hồi',
+    },
+    pipeline: {
+      title: 'Pipeline Bán Hàng (Kanban)',
+      subtitle: 'Theo dõi tiến trình từ lúc tiếp cận đến khi chốt hợp đồng',
     },
     templates: {
       title: 'Mẫu Tin Nhắn Tiếp Cận (Templates)',
@@ -32,6 +36,10 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onOpenAddLead }) => 
     team: {
       title: 'Thành Viên & Phân Quyền',
       subtitle: 'Quản lý danh sách video editor trong workspace',
+    },
+    analytics: {
+      title: 'Báo Cáo & Thống Kê (Analytics)',
+      subtitle: 'Theo dõi hiệu suất của từng editor và nhóm khách hàng hiệu quả nhất',
     },
   };
 

@@ -7,12 +7,22 @@ import {
   FileText,
   ShieldCheck,
   LogOut,
+  Compass,
+  BarChart3,
   ChevronDown,
   Sparkles,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 
-export type NavTab = 'dashboard' | 'leads' | 'pipeline' | 'followups' | 'templates' | 'team';
+export type NavTab =
+  | 'dashboard'
+  | 'discover'
+  | 'leads'
+  | 'followups'
+  | 'pipeline'
+  | 'templates'
+  | 'team'
+  | 'analytics';
 
 interface SidebarProps {
   currentTab: NavTab;
@@ -25,11 +35,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onOpe
 
   const navItems = [
     { id: 'dashboard' as NavTab, label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'discover' as NavTab, label: 'Khám Phá (Discover)', icon: Compass },
     { id: 'leads' as NavTab, label: 'Danh Sách Lead', icon: Users },
-    { id: 'pipeline' as NavTab, label: 'Pipeline Kanban', icon: Kanban },
     { id: 'followups' as NavTab, label: 'Lịch Follow-up', icon: CalendarClock },
+    { id: 'pipeline' as NavTab, label: 'Pipeline Kanban', icon: Kanban },
     { id: 'templates' as NavTab, label: 'Mẫu Tin Nhắn', icon: FileText },
     { id: 'team' as NavTab, label: 'Team & Thành Viên', icon: ShieldCheck },
+    { id: 'analytics' as NavTab, label: 'Thống Kê (Analytics)', icon: BarChart3 },
   ];
 
   return (

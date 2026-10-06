@@ -9,6 +9,7 @@ import { pipelineApp } from './modules/pipeline';
 import { templatesApp } from './modules/templates';
 import { followupsApp } from './modules/followups';
 import { dashboardApp } from './modules/dashboard';
+import { analyticsApp } from './modules/analytics';
 
 const app = new Hono<AppContext>();
 
@@ -63,6 +64,7 @@ app.get('/', (c) => {
       templates: '/api/v1/templates',
       followUps: '/api/v1/follow-ups',
       dashboard: '/api/v1/dashboard',
+      analytics: '/api/v1/analytics',
     },
   });
 });
@@ -85,5 +87,6 @@ app.route('/api/v1/pipelines', pipelineApp);
 app.route('/api/v1/templates', templatesApp);
 app.route('/api/v1/follow-ups', followupsApp);
 app.route('/api/v1/dashboard', dashboardApp);
+app.route('/api/v1/analytics', analyticsApp);
 
 export default app;
