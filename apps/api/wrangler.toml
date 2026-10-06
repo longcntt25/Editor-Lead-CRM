@@ -6,4 +6,4 @@ compatibility_date = "2024-09-23"
 [[d1_databases]]
 binding = "DB"
 database_name = "editor_crm_d1"
-database_id = "local-editor-crm-d1-id"
+database_id = "c3b614ed-ac05-4886-8d1c-d6ab1ceeabfd"
